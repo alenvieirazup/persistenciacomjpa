@@ -14,8 +14,7 @@ import javax.persistence.Persistence;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ProdutoTest {
 
@@ -71,4 +70,67 @@ class ProdutoTest {
         assertAll(() -> assertNotNull(celular.getId()),
                 () -> assertNotNull(celulares.getId()));
     }
+
+    @Test
+    public void testPersistirProdutoAtualizarNaoAtualizarDepoisTransacaoLimpada() {
+        Produto celular = new Produto("Produto 1", "Bom", new BigDecimal("500"));
+
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        ProdutoDao produtoDao = new ProdutoDao(entityManager);
+
+        entityManager.getTransaction().begin();
+
+        produtoDao.cadastrar(celular);
+
+        celular.setPreco(new BigDecimal(200));
+        entityManager.flush();
+        entityManager.clear();
+
+        celular.setPreco(new BigDecimal(100));
+        entityManager.flush();
+        Produto produto = produtoDao.buscarPorId(celular.getId());
+        entityManager.close();
+        assertAll(() -> assertNotNull(celular.getId()),
+                () -> assertTrue(produto.getPreco().compareTo(new BigDecimal(200.0)) == 0));
+    }
+
+    @Test
+    public void testPersistirProdutoEAtualizar() {
+        Produto celular = new Produto("Produto 2", "Ruim", new BigDecimal("500"));
+
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        ProdutoDao produtoDao = new ProdutoDao(entityManager);
+
+        entityManager.getTransaction().begin();
+
+        produtoDao.cadastrar(celular);
+        entityManager.flush();
+        entityManager.clear();
+        celular.setPreco(new BigDecimal(200));
+        produtoDao.atualizar(celular);
+        entityManager.close();
+        assertAll(() -> assertNotNull(celular.getId()),
+                () -> assertTrue(celular.getPreco().compareTo(new BigDecimal(200.0)) == 0));
+    }
+
+    @Test
+    public void testPersistirProdutoERemover() {
+        Produto celular = new Produto("Produto Top", "Show", new BigDecimal("1500"));
+
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        ProdutoDao produtoDao = new ProdutoDao(entityManager);
+
+        entityManager.getTransaction().begin();
+
+        produtoDao.cadastrar(celular);
+        entityManager.flush();
+        entityManager.clear();
+
+        produtoDao.remover(celular);
+        Produto produto = produtoDao.buscarPorId(celular.getId());
+        entityManager.close();
+        assertNull(produto);
+    }
+
+
 }

@@ -20,6 +20,12 @@ public class Produto {
     public Produto() {
     }
 
+    public Produto(String nome, String descricao, BigDecimal preco) {
+        this.nome = nome;
+        this.descricao = descricao;
+        this.preco = preco;
+    }
+
     public Produto(String nome, String descricao, BigDecimal preco, Categoria categoria) {
         this.nome = nome;
         this.descricao = descricao;
