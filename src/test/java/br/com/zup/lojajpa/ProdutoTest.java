@@ -11,15 +11,14 @@ import org.junit.jupiter.api.Test;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ProdutoTest {
 
-    private static EntityManagerFactory entityManagerFactory;
     private static final String PERSISTENCE_UNIT_NAME = "lojajpa";
+    private static EntityManagerFactory entityManagerFactory;
 
     @BeforeAll
     public static void init() {
@@ -34,6 +33,7 @@ class ProdutoTest {
     @Test
     public void testCriarEntityManager() {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
+        entityManager.close();
         assertNotNull(entityManager);
     }
 
@@ -47,13 +47,14 @@ class ProdutoTest {
         entityManager.getTransaction().begin();
         entityManager.persist(celular);
         entityManager.getTransaction().commit();
+        entityManager.close();
         assertNotNull(celular.getId());
     }
 
     @Test
     public void testPersistirProdutoComCategoria() {
         Categoria celulares = new Categoria("CELULARES");
-        Produto celular = new Produto("Xiaomi Redmi", "Muito legal", new BigDecimal("800"), celulares );
+        Produto celular = new Produto("Xiaomi Redmi", "Muito legal", new BigDecimal("800"), celulares);
 
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         ProdutoDao produtoDao = new ProdutoDao(entityManager);
@@ -67,8 +68,7 @@ class ProdutoTest {
         entityManager.getTransaction().commit();
         entityManager.close();
 
-        assertAll(() -> assertNotNull(celular.getId()),
-                () -> assertNotNull(celulares.getId()));
+        assertAll(() -> assertNotNull(celular.getId()), () -> assertNotNull(celulares.getId()));
     }
 
     @Test
@@ -89,9 +89,9 @@ class ProdutoTest {
         celular.setPreco(new BigDecimal(100));
         entityManager.flush();
         Produto produto = produtoDao.buscarPorId(celular.getId());
+        entityManager.getTransaction().commit();
         entityManager.close();
-        assertAll(() -> assertNotNull(celular.getId()),
-                () -> assertTrue(produto.getPreco().compareTo(new BigDecimal(200.0)) == 0));
+        assertAll(() -> assertNotNull(celular.getId()), () -> assertTrue(produto.getPreco().compareTo(new BigDecimal(200.0)) == 0));
     }
 
     @Test
@@ -108,9 +108,9 @@ class ProdutoTest {
         entityManager.clear();
         celular.setPreco(new BigDecimal(200));
         produtoDao.atualizar(celular);
+        entityManager.getTransaction().commit();
         entityManager.close();
-        assertAll(() -> assertNotNull(celular.getId()),
-                () -> assertTrue(celular.getPreco().compareTo(new BigDecimal(200.0)) == 0));
+        assertAll(() -> assertNotNull(celular.getId()), () -> assertTrue(celular.getPreco().compareTo(new BigDecimal(200.0)) == 0));
     }
 
     @Test
@@ -128,9 +128,9 @@ class ProdutoTest {
 
         produtoDao.remover(celular);
         Produto produto = produtoDao.buscarPorId(celular.getId());
+        entityManager.getTransaction().commit();
         entityManager.close();
         assertNull(produto);
     }
-
 
 }
