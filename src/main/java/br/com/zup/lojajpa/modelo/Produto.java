@@ -1,4 +1,4 @@
-package br.com.zup.lojajpa;
+package br.com.zup.lojajpa.modelo;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -14,8 +14,17 @@ public class Produto {
     private String descricao;
     private BigDecimal preco;
     private LocalDate dataCadastro = LocalDate.now();
+    @ManyToOne
+    private Categoria categoria;
 
     public Produto() {
+    }
+
+    public Produto(String nome, String descricao, BigDecimal preco, Categoria categoria) {
+        this.nome = nome;
+        this.descricao = descricao;
+        this.preco = preco;
+        this.categoria = categoria;
     }
 
     public Long getId() {
@@ -56,6 +65,14 @@ public class Produto {
 
     public void setDataCadastro(LocalDate dataCadastro) {
         this.dataCadastro = dataCadastro;
+    }
+
+    public Categoria getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(Categoria categoria) {
+        this.categoria = categoria;
     }
 
 }
