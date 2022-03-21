@@ -12,6 +12,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -131,6 +132,46 @@ class ProdutoTest {
         entityManager.getTransaction().commit();
         entityManager.close();
         assertNull(produto);
+    }
+
+    @Test
+    public void testPersistirProdutoEBuscarPorNome() {
+        Produto celular = new Produto("Tijolo", "Antigo", new BigDecimal("1"));
+
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        ProdutoDao produtoDao = new ProdutoDao(entityManager);
+
+        entityManager.getTransaction().begin();
+
+        produtoDao.cadastrar(celular);
+
+        entityManager.getTransaction().commit();
+        List<Produto> produtos = produtoDao.buscarPorNome("Tijolo");
+        entityManager.close();
+
+        assertFalse(produtos.isEmpty());
+    }
+
+    @Test
+    public void testPersistirProdutoEBuscarPorNomeDaCategoria() {
+        Categoria celulares = new Categoria("C");
+        Produto celular = new Produto("Tijolinho", "Novo", new BigDecimal("2"), celulares);
+
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        ProdutoDao produtoDao = new ProdutoDao(entityManager);
+        CategoriaDao categoriaDao = new CategoriaDao(entityManager);
+
+        entityManager.getTransaction().begin();
+
+        categoriaDao.cadastrar(celulares);
+        produtoDao.cadastrar(celular);
+
+        entityManager.getTransaction().commit();
+
+        List<Produto> produtos = produtoDao.buscarPorNomeDaCategoria("C");
+        entityManager.close();
+
+        assertFalse(produtos.isEmpty());
     }
 
 }
